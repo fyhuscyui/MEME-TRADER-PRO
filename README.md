@@ -8,4 +8,4 @@ Track your meme coin portfolio and lock in profits with a disciplined strategy.
 - Anti round-trip alerts
 
 ## Author
-[fyhuscyui
+LeMax
