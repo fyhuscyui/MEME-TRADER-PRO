@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meme Trader Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080a0d;
+  --bg2:#0e1117;
+  --bg3:#141820;
+  --bg4:#1c2230;
+  --bg5:#242d3d;
+  --accent:#f0b90b;
+  --accent2:#e6a800;
+  --green:#00d68f;
+  --green2:#00b87a;
+  --red:#ff4d6a;
+  --red2:#e6304a;
+  --blue:#4d9fff;
+  --purple:#a78bfa;
+  --text:#e8edf5;
+  --text2:#8a96a8;
+  --text3:#4a5568;
+  --border:#1e2636;
+  --border2:#2a3548;
+  --border3:#374255;
+  --mono:'Space Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--display);font-size:13px;line-height:1.5}
+
+/* SCANLINES */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:1000}
+
+/* NAV */
+.nav{background:rgba(14,17,23,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border2);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000}
+.logo-text{font-size:14px;font-weight:800;letter-spacing:1px;color:var(--text)}
+.logo-sub{font-size:9px;color:var(--text3);letter-spacing:2px;margin-top:-2px}
+
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-tabs{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px}
+.tab{padding:5px 13px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);border:none;background:transparent;transition:all .2s;letter-spacing:.5px;font-family:var(--display)}
+.tab.active{background:var(--bg5);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* RULES TICKER */
+.ticker{background:rgba(240,185,11,.06);border-bottom:1px solid rgba(240,185,11,.15);padding:7px 0;overflow:hidden;position:relative}
+.ticker::before,.ticker::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}
+.ticker::after{right:0;background:linear-gradient(-90deg,var(--bg2),transparent)}
+.ticker-inner{display:flex;gap:40px;animation:ticker 25s linear infinite;white-space:nowrap;padding:0 20px}
+.ticker-item{font-size:10px;color:var(--accent);letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:6px}
+.ticker-item::before{content:'◆';font-size:6px;opacity:.6}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.main{padding:16px 20px;max-width:1200px;margin:0 auto}
+
+/* SETUP MODAL */
+.setup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.setup-card{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:100%;max-width:420px}
+.setup-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px}
+.setup-sub{font-size:12px;color:var(--text2);margin-bottom:24px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.big-input-wrap{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 14px}
+.dollar-sign{font-size:18px;color:var(--text3);font-family:var(--mono);font-weight:700}
+.big-input{background:none;border:none;color:var(--text);font-size:22px;font-weight:700;width:100%;outline:none;font-family:var(--mono)}
+.big-input::placeholder{color:var(--text3)}
+.input-label{font-size:10px;color:var(--text2);letter-spacing:1px;font-weight:600;margin-bottom:6px}
+.arrow-between{text-align:center;font-size:20px;color:var(--text3);display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px}
+.btn-setup{width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;font-family:var(--display);transition:all .2s}
+.btn-setup:hover{background:var(--accent2);transform:translateY(-1px)}
+
+/* CARDS */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.kcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kcard.k-pv::before{background:linear-gradient(90deg,var(--green),transparent)}
+.kcard.k-pnl::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.kcard.k-sec::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.kcard.k-risk::before{background:linear-gradient(90deg,var(--red),transparent)}
+.kcard-label{font-size:10px;color:var(--text3);letter-spacing:1.5px;font-weight:600;margin-bottom:6px}
+.kcard-value{font-size:22px;font-weight:700;font-family:var(--mono);letter-spacing:-0.5px}
+.kcard-sub{font-size:10px;color:var(--text2);margin-top:3px;font-family:var(--mono)}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.amber{color:var(--accent)}
+.blue{color:var(--blue)}
+
+/* PROGRESS */
+.progress-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text2)}
+.progress-pct{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--accent)}
+.progress-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;position:relative}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--accent));transition:width .5s cubic-bezier(.4,0,.2,1);position:relative}
+.progress-glow{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.progress-footer{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* SECTION */
+.section-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text2)}
+.section-count{font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+/* BUTTONS */
+.btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border2);cursor:pointer;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text);transition:all .15s;font-family:var(--display);letter-spacing:.3px}
+.btn:hover{background:var(--bg4);border-color:var(--border3)}
+.btn-accent{background:var(--accent);color:#000;border-color:var(--accent)}
+.btn-accent:hover{background:var(--accent2);border-color:var(--accent2);transform:translateY(-1px)}
+.btn-green{background:rgba(0,214,143,.12);color:var(--green);border-color:rgba(0,214,143,.25)}
+.btn-green:hover{background:rgba(0,214,143,.2)}
+.btn-red{background:rgba(255,77,106,.12);color:var(--red);border-color:rgba(255,77,106,.25)}
+.btn-red:hover{background:rgba(255,77,106,.2)}
+.btn-sm{padding:3px 8px;font-size:10px}
+.btn-icon{padding:5px 8px;font-size:12px}
+
+/* FORM */
+.form-panel{background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:14px;margin-bottom:12px;animation:slideDown .2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:8px}
+label{display:block;font-size:10px;color:var(--text3);margin-bottom:4px;letter-spacing:.8px;font-weight:600}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:7px 10px;font-size:12px;width:100%;outline:none;font-family:var(--mono);transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--bg3);color:var(--text)}
+textarea{resize:none;font-family:var(--display);font-size:12px}
+.form-actions{display:flex;gap:8px;margin-top:4px}
+
+/* TRADE CARDS */
+.trade-list{display:flex;flex-direction:column;gap:8px}
+.trade-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color .2s;position:relative;overflow:hidden}
+.trade-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px}
+.trade-card.positive::before{background:var(--green)}
+.trade-card.negative::before{background:var(--red)}
+.trade-card.neutral::before{background:var(--text3)}
+.trade-card.warning{border-color:rgba(255,77,106,.35);background:rgba(255,77,106,.03)}
+.trade-card.warning::before{background:var(--red);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.trade-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:4px}
+.coin-info{display:flex;align-items:center;gap:8px}
+.coin-avatar{width:32px;height:32px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;letter-spacing:-0.5px;color:var(--accent);flex-shrink:0}
+.coin-name{font-size:15px;font-weight:700}
+.coin-date{font-size:10px;color:var(--text3);margin-top:1px;font-family:var(--mono)}
+.mult-badge{font-size:16px;font-weight:700;font-family:var(--mono);text-align:right}
+.pnl-line{font-size:11px;font-family:var(--mono);text-align:right;margin-top:1px}
+
+.badge{padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.8px}
+.badge-low{background:rgba(0,214,143,.12);color:var(--green);border:1px solid rgba(0,214,143,.2)}
+.badge-mid{background:rgba(240,185,11,.12);color:var(--accent);border:1px solid rgba(240,185,11,.2)}
+.badge-high{background:rgba(255,77,106,.12);color:var(--red);border:1px solid rgba(255,77,106,.2)}
+
+.trade-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(75px,1fr));gap:5px;margin-bottom:10px}
+.stat-item{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
+.stat-label{font-size:9px;color:var(--text3);letter-spacing:.5px;font-weight:600;margin-bottom:2px}
+.stat-val{font-size:12px;font-weight:600;font-family:var(--mono)}
+.edit-price-wrap{display:flex;align-items:center;gap:4px}
+.edit-price{width:70px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text);padding:2px 5px;font-size:11px;font-family:var(--mono)}
+
+.strategy-label{font-size:9px;color:var(--text3);letter-spacing:1px;font-weight:600;margin-bottom:5px}
+.strategy-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.tp-btn{padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:var(--display);transition:all .15s;letter-spacing:.3px}
+.tp-x2{background:rgba(0,214,143,.15);color:var(--green);border:1px solid rgba(0,214,143,.25)}
+.tp-x3{background:rgba(240,185,11,.15);color:var(--accent);border:1px solid rgba(240,185,11,.25)}
+.tp-x5{background:rgba(77,159,255,.15);color:var(--blue);border:1px solid rgba(77,159,255,.25)}
+.tp-x10{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.tp-btn:hover{filter:brightness(1.2);transform:translateY(-1px)}
+.tp-btn.done{opacity:.3;cursor:default;text-decoration:line-through;transform:none;filter:none}
+
+.alert-bar{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);border-radius:5px;padding:6px 10px;font-size:10px;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.3px}
+
+.trade-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;padding-top:8px;border-top:1px solid var(--border)}
+.emotion-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;border:1px solid;letter-spacing:.5px}
+.note-text{font-size:10px;color:var(--text3);font-style:italic;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* HISTORY */
+.hist-list{display:flex;flex-direction:column;gap:5px}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.hist-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hist-coin{font-weight:700;font-size:12px}
+.hist-level{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.hist-date{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.hist-amount{font-weight:700;font-family:var(--mono);font-size:13px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;position:relative;overflow:hidden}
+.stat-card-accent{position:absolute;top:0;right:0;width:3px;bottom:0;border-radius:0 8px 8px 0}
+.stat-card-label{font-size:9px;color:var(--text3);letter-spacing:1.5px;font-weight:700;margin-bottom:6px}
+.stat-card-val{font-size:20px;font-weight:700;font-family:var(--mono)}
+.stat-card-sub{font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.discipline-bar{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px}
+.disc-title{font-size:9px;letter-spacing:1.5px;color:var(--text3);font-weight:700;margin-bottom:8px}
+
+/* EMPTY */
+.empty-state{text-align:center;color:var(--text3);padding:32px 20px;font-size:12px;background:var(--bg2);border:1px dashed var(--border);border-radius:8px}
+.empty-icon{font-size:28px;margin-bottom:8px;opacity:.4}
+.empty-sub{font-size:10px;margin-top:4px;color:var(--text3)}
+
+/* MINI TRADE (dashboard) */
+.mini-trade{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.mini-trade.warning{border-color:rgba(255,77,106,.35)}
+.mini-name{font-weight:700;font-size:13px}
+.mini-right{text-align:right}
+.mini-mult{font-family:var(--mono);font-weight:700;font-size:13px}
+.mini-pnl{font-family:var(--mono);font-size:10px}
+
+/* RESET LINK */
+.reset-link{font-size:10px;color:var(--text3);cursor:pointer;text-decoration:underline;letter-spacing:.3px}
+.reset-link:hover{color:var(--red)}
+</style>
+</head>
+<body>
+
+<div id="setup-overlay" class="setup-overlay">
+  <div class="setup-card">
+    <div class="setup-title">MEME TRADER PRO</div>
+    <div class="setup-sub">Définissez vos objectifs pour commencer</div>
+    <div class="setup-grid">
+      <div>
+        <div class="input-label">CAPITAL DE DÉPART</div>
+        <div class="big-input-wrap">
+          <span class="dollar-sign">$</span>
+          <input class="big-input" type="number" id="setup-initial" placeholder="100" min="1"/>
+        </div>
+      </div>
+      <div class="arrow-between">→</div>
+      <div>
+        <div class="input-label">OBJECTIF CIBLE</div>
+        <div class="big-input-wrap">
+          <span class="dollar-sign">$</span>
+          <input class="big-input" type="number" id="setup-goal" placeholder="1000" min="1"/>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:16px;padding:8px 10px;background:var(--bg3);border-radius:6px;line-height:1.6">
+      ◆ Ces valeurs peuvent être modifiées à tout moment dans les paramètres.
+    </div>
+    <button class="btn-setup" onclick="startApp()">LANCER LE TRACKER →</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="nav">
+    <div class="logo">
+      <div class="logo-icon">M</div>
+      <div>
+        <div class="logo-text">MEME TRADER PRO</div>
+        <div class="logo-sub">DISCIPLINE · PROFIT · RÉPÉTITION</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-tabs">
+        <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+        <button class="tab" onclick="showTab('trades')">Trades</button>
+        <button class="tab" onclick="showTab('history')">Historique</button>
+        <button class="tab" onclick="showTab('stats')">Stats</button>
+      </div>
+      <button class="btn btn-sm" onclick="openSettings()" title="Modifier objectifs">⚙</button>
+    </div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-inner" id="ticker-inner">
+      <span class="ticker-item">Ne jamais all-in sur une seule position</span>
+      <span class="ticker-item">Toujours retirer au x2 — sécurise ta mise</span>
+      <span class="ticker-item">Un gain non pris est une perte potentielle</span>
+      <span class="ticker-item">Couper les pertes rapidement</span>
+      <span class="ticker-item">Le moonbag c'est pour le x10 seulement</span>
+      <span class="ticker-item">Ne jamais all-in sur une seule position</span>
+      <span class="ticker-item">Toujours retirer au x2 — sécurise ta mise</span>
+      <span class="ticker-item">Un gain non pris est une perte potentielle</span>
+      <span class="ticker-item">Couper les pertes rapidement</span>
+      <span class="ticker-item">Le moonbag c'est pour le x10 seulement</span>
+    </div>
+  </div>
+
+  <div class="main" id="main-content"></div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:300;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:100%;max-width:340px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+      Modifier les objectifs
+      <button onclick="closeSettings()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;line-height:1">×</button>
+    </div>
+    <div style="margin-bottom:10px">
+      <label>CAPITAL INITIAL ($)</label>
+      <input type="number" id="s-initial" placeholder="100"/>
+    </div>
+    <div style="margin-bottom:16px">
+      <label>OBJECTIF ($)</label>
+      <input type="number" id="s-goal" placeholder="1000"/>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-accent" style="flex:1" onclick="saveSettings()">Sauvegarder</button>
+      <button class="btn btn-red" onclick="resetAll()">Reset tout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────
+let state = JSON.parse(localStorage.getItem('mtp2_state') || 'null') || {
+  initial: 0,
+  goal: 0,
+  secured: 0,
+  trades: [],
+  history: [],
+  closedTrades: []
+};
+let currentTab = 'dashboard';
+
+function save(){ localStorage.setItem('mtp2_state', JSON.stringify(state)); }
+
+// ─── SETUP ───────────────────────────────────────────────────
+window.onload = function(){
+  if(state.initial > 0 && state.goal > 0){
+    document.getElementById('setup-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render();
+  }
+};
+
+function startApp(){
+  const ini = parseFloat(document.getElementById('setup-initial').value);
+  const goal = parseFloat(document.getElementById('setup-goal').value);
+  if(!ini || ini <= 0){ alert('Entrez un capital de départ valide'); return; }
+  if(!goal || goal <= ini){ alert('L\'objectif doit être supérieur au capital de départ'); return; }
+  state.initial = ini;
+  state.goal = goal;
+  if(state.secured === 0) state.secured = ini;
+  save();
+  document.getElementById('setup-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  render();
+}
+
+function openSettings(){
+  document.getElementById('s-initial').value = state.initial;
+  document.getElementById('s-goal').value = state.goal;
+  document.getElementById('settings-modal').style.display = 'flex';
+}
+function closeSettings(){
+  document.getElementById('settings-modal').style.display = 'none';
+}
+function saveSettings(){
+  const ini = parseFloat(document.getElementById('s-initial').value);
+  const goal = parseFloat(document.getElementById('s-goal').value);
+  if(!ini || ini <= 0 || !goal || goal <= 0){ alert('Valeurs invalides'); return; }
+  state.initial = ini;
+  state.goal = goal;
+  save(); closeSettings(); render();
+}
+function resetAll(){
+  if(!confirm('Réinitialiser TOUT le tracker? Cette action est irréversible.')) return;
+  localStorage.removeItem('mtp2_state');
+  location.reload();
+}
+
+// ─── UTILS ───────────────────────────────────────────────────
+function fmt(v){ return '$' + Math.abs(v).toFixed(2); }
+function fmtPct(v){ return (v >= 0 ? '+' : '') + v.toFixed(1) + '%'; }
+function pct(v, ref){ return ref === 0 ? 0 : ((v - ref) / ref * 100); }
+
+function totalInvested(){ return state.trades.reduce((a, t) => a + t.invested, 0); }
+function totalCurVal(){
+  return state.trades.reduce((a, t) => {
+    const m = t.entryPrice > 0 && t.currentPrice > 0 ? t.currentPrice / t.entryPrice : 1;
+    return a + t.invested * m;
+  }, 0);
+}
+function portfolioValue(){ return state.secured + totalCurVal() - totalInvested(); }
+
+function emotionStyle(e){
+  const map = {
+    FOMO: 'color:#f0b90b;border-color:rgba(240,185,11,.3)',
+    Conviction: 'color:#00d68f;border-color:rgba(0,214,143,.3)',
+    Gamble: 'color:#ff4d6a;border-color:rgba(255,77,106,.3)',
+    DCA: 'color:#4d9fff;border-color:rgba(77,159,255,.3)'
+  };
+  return map[e] || 'color:var(--text2);border-color:var(--border)';
+}
+
+function coinInitials(coin){ return coin.slice(0, 3).toUpperCase(); }
+
+// ─── TABS ─────────────────────────────────────────────────────
+function showTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((b, i) => {
+    b.classList.toggle('active', ['dashboard','trades','history','stats'][i] === tab);
+  });
+  render();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────
+function render(){
+  const el = document.getElementById('main-content');
+  if(!el) return;
+  if(currentTab === 'dashboard') el.innerHTML = renderDashboard();
+  else if(currentTab === 'trades') el.innerHTML = renderTrades();
+  else if(currentTab === 'history') el.innerHTML = renderHistory();
+  else el.innerHTML = renderStats();
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────
+function renderDashboard(){
+  const pv = portfolioValue();
+  const pnl = pv - state.initial;
+  const pnlPct = pct(pv, state.initial);
+  const inv = totalInvested();
+  const cur = totalCurVal();
+  const activePnl = cur - inv;
+  const progress = Math.min(100, Math.max(0, ((pv - state.initial) / (state.goal - state.initial)) * 100));
+
+  return `
+  <div class="grid2">
+    <div class="kcard k-pv">
+      <div class="kcard-label">PORTEFEUILLE</div>
+      <div class="kcard-value ${pv >= state.initial ? 'green' : 'red'}">${fmt(pv)}</div>
+      <div class="kcard-sub">Initial: ${fmt(state.initial)}</div>
+    </div>
+    <div class="kcard k-pnl">
+      <div class="kcard-label">PnL TOTAL</div>
+      <div class="kcard-value ${pnl >= 0 ? 'green' : 'red'}">${pnl >= 0 ? '+' : ''}${fmt(pnl)}</div>
+      <div class="kcard-sub ${pnlPct >= 0 ? 'green' : 'red'}">${fmtPct(pnlPct)}</div>
+    </div>
+    <div class="kcard k-sec">
+      <div class="kcard-label">SÉCURISÉ</div>
+      <div class="kcard-value blue">${fmt(state.secured)}</div>
+      <div class="kcard-sub">Hors marché</div>
+    </div>
+    <div class="kcard k-risk">
+      <div class="kcard-label">EN JEU</div>
+      <div class="kcard-value amber">${fmt(inv)}</div>
+      <div class="kcard-sub ${activePnl >= 0 ? 'green' : 'red'}">PnL actif: ${activePnl >= 0 ? '+' : ''}${fmt(activePnl)}</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-title">OBJECTIF: ${fmt(state.goal)}</span>
+      <span class="progress-pct">${progress.toFixed(1)}%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:${progress}%">
+        ${progress > 5 ? '<div class="progress-glow"></div>' : ''}
+      </div>
+    </div>
+    <div class="progress-footer">
+      <span>${fmt(state.initial)}</span>
+      <span>${progress >= 100 ? '🎯 OBJECTIF ATTEINT!' : 'Encore ' + fmt(Math.max(0, state.goal - pv)) + ' à gagner'}</span>
+      <span>${fmt(state.goal)}</span>
+    </div>
+  </div>
+
+  <div class="section-bar">
+    <div class="section-title">POSITIONS ACTIVES</div>
+    <div class="section-count">${state.trades.length} trade${state.trades.length > 1 ? 's' : ''}</div>
+  </div>
+  ${state.trades.length === 0
+    ? `<div class="empty-state"><div class="empty-icon">📊</div>Aucune position ouverte<div class="empty-sub">Allez dans l'onglet Trades pour ouvrir une position</div></div>`
+    : state.trades.map(t => {
+        const m = t.entryPrice > 0 && t.currentPrice > 0 ? t.currentPrice / t.entryPrice : 1;
+        const pnlT = t.invested * (m - 1);
+        const rt = t.maxMultiplier >= 2 && m < t.maxMultiplier * 0.7;
+        return `<div class="mini-trade ${rt ? 'warning' : ''}">
+          <div><span class="mini-name">${t.coin}</span>${rt ? '<span style="color:var(--red);font-size:10px;margin-left:8px">⚠ ROUND-TRIP</span>' : ''}</div>
+          <div class="mini-right">
+            <div class="mini-mult ${m >= 1 ? 'green' : 'red'}">${m.toFixed(2)}x</div>
+            <div class="mini-pnl ${pnlT >= 0 ? 'green' : 'red'}">${pnlT >= 0 ? '+' : ''}${fmt(pnlT)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+  `;
+}
+
+// ─── TRADES ───────────────────────────────────────────────────
+function renderTrades(){
+  return `
+  <div class="section-bar">
+    <div class="section-title">NOUVELLE POSITION</div>
+    <button class="btn btn-accent" onclick="toggleForm()">+ Ouvrir un trade</button>
+  </div>
+
+  <div id="trade-form" style="display:none">
+    <div class="form-panel">
+      <div class="form-grid">
+        <div><label>COIN</label><input id="f-coin" placeholder="PEPE, DOGE, WIF..."/></div>
+        <div><label>MONTANT ($)</label><input id="f-amt" type="number" placeholder="10" min="0.01" step="0.01"/></div>
+        <div><label>PRIX ENTRÉE</label><input id="f-entry" type="number" placeholder="0.000001" step="any"/></div>
+        <div><label>PRIX ACTUEL</label><input id="f-cur" type="number" placeholder="= entrée" step="any"/></div>
+        <div><label>MARKET CAP</label><input id="f-mcap" placeholder="ex: 2M, 50M..."/></div>
+        <div><label>RISQUE</label>
+          <select id="f-risk">
+            <option value="low">🟢 Low</option>
+            <option value="mid" selected>🟡 Mid</option>
+            <option value="high">🔴 High</option>
+          </select>
+        </div>
+        <div><label>ÉMOTION</label>
+          <select id="f-emotion">
+            <option value="Conviction">Conviction</option>
+            <option value="FOMO">FOMO</option>
+            <option value="Gamble">Gamble</option>
+            <option value="DCA">DCA</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:8px"><label>RAISON D'ENTRÉE</label><textarea id="f-note" rows="2" placeholder="Pourquoi ce trade? Catalyseur, analyse..."></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-accent" onclick="addTrade()">✓ Confirmer la position</button>
+        <button class="btn" onclick="toggleForm()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar" style="margin-top:4px">
+    <div class="section-title">POSITIONS OUVERTES</div>
+    <div class="section-count">${state.trades.length} actif${state.trades.length > 1 ? 's' : ''}</div>
+  </div>
+  <div class="trade-list">
+    ${state.trades.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">💼</div>Aucune position ouverte<div class="empty-sub">Cliquez sur "Ouvrir un trade" ci-dessus</div></div>`
+      : state.trades.map((t, i) => renderTradeCard(t, i)).join('')}
+  </div>`;
+}
+
+function renderTradeCard(t, i){
+  const m = t.entryPrice > 0 && t.currentPrice > 0 ? t.currentPrice / t.entryPrice : 1;
+  const curVal = t.invested * m;
+  const pnlT = curVal - t.invested;
+  const pnlPct = pct(curVal, t.invested);
+  if(m > (t.maxMultiplier || 0)){ state.trades[i].maxMultiplier = m; save(); }
+  const maxM = t.maxMultiplier || m;
+  const rt = maxM >= 2 && m < maxM * 0.7;
+  const cls = m > 1.05 ? 'positive' : m < 0.95 ? 'negative' : 'neutral';
+  const tpLevels = [
+    {label:'x2 → -50%', cls:'tp-x2', key:'x2', desc:'Récupère ta mise'},
+    {label:'x3 → -25%', cls:'tp-x3', key:'x3', desc:'Sécurise les gains'},
+    {label:'x5 → -15%', cls:'tp-x5', key:'x5', desc:'Prends tes profits'},
+    {label:'x10 moonbag',cls:'tp-x10',key:'x10',desc:'Laisse courir'}
+  ];
+  return `
+  <div class="trade-card ${cls} ${rt ? 'warning' : ''}">
+    ${rt ? `<div class="alert-bar">⚠ ROUND-TRIP DÉTECTÉ — Max: ${maxM.toFixed(1)}x — Tu aurais dû prendre profit ici!</div>` : ''}
+    <div class="trade-header">
+      <div class="coin-info">
+        <div class="coin-avatar">${coinInitials(t.coin)}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="coin-name">${t.coin}</span>
+            <span class="badge badge-${t.risk}">${t.risk.toUpperCase()}</span>
+            ${t.mcap ? `<span style="font-size:9px;color:var(--text3);font-family:var(--mono)">${t.mcap}</span>` : ''}
+          </div>
+          <div class="coin-date">Entré ${fmt(t.invested)} · ${t.date}</div>
+        </div>
+      </div>
+      <div>
+        <div class="mult-badge ${m >= 1 ? 'green' : 'red'}">${m.toFixed(2)}x</div>
+        <div class="pnl-line ${pnlT >= 0 ? 'green' : 'red'}">${pnlT >= 0 ? '+' : ''}${fmt(pnlT)} (${fmtPct(pnlPct)})</div>
+      </div>
+    </div>
+
+    <div class="trade-stats">
+      <div class="stat-item">
+        <div class="stat-label">INVESTI</div>
+        <div class="stat-val">${fmt(t.invested)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">VALEUR</div>
+        <div class="stat-val ${pnlT >= 0 ? 'green' : 'red'}">${fmt(curVal)}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">MAX ATT.</div>
+        <div class="stat-val amber">${maxM.toFixed(2)}x</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">PRIX ACTUEL</div>
+        <div class="stat-val">
+          <div class="edit-price-wrap">
+            <input class="edit-price" type="number" step="any" value="${t.currentPrice}" onchange="updatePrice(${i}, this.value)"/>
+          </div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">ENTRÉE</div>
+        <div class="stat-val" style="font-size:10px">${t.entryPrice}</div>
+      </div>
+    </div>
+
+    <div class="strategy-label">STRATÉGIE DE SORTIE</div>
+    <div class="strategy-row">
+      ${tpLevels.map(tp => `
+        <button class="tp-btn ${tp.cls} ${t.takenProfits && t.takenProfits.includes(tp.key) ? 'done' : ''}"
+          onclick="takeProfit(${i}, '${tp.key}')" title="${tp.desc}">
+          ${tp.label}
+        </button>`).join('')}
+    </div>
+
+    <div class="trade-footer">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="emotion-tag" style="${emotionStyle(t.emotion)}">${t.emotion}</span>
+        ${t.note ? `<span class="note-text" title="${t.note}">"${t.note}"</span>` : ''}
+      </div>
+      <button class="btn btn-red btn-sm" onclick="closeTrade(${i})">Fermer le trade</button>
+    </div>
+  </div>`;
+}
+
+// ─── HISTORY ──────────────────────────────────────────────────
+function renderHistory(){
+  return `
+  <div class="section-bar">
+    <div class="section-title">PRISES DE PROFITS</div>
+    <div class="section-count green">${fmt(state.secured)} sécurisés</div>
+  </div>
+  <div class="hist-list">
+    ${state.history.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">💰</div>Aucune prise de profit<div class="empty-sub">Vos prises de profits apparaîtront ici</div></div>`
+      : [...state.history].reverse().map(h => `
+        <div class="hist-item">
+          <div class="hist-left">
+            <span class="hist-coin">${h.coin}</span>
+            <span class="hist-level" style="background:var(--bg3);padding:1px 6px;border-radius:3px">${h.level}</span>
+            <span class="hist-date">${h.date}</span>
+          </div>
+          <span class="hist-amount green">+${fmt(h.amount)}</span>
+        </div>`).join('')}
+  </div>
+
+  <div class="section-bar" style="margin-top:14px">
+    <div class="section-title">TRADES FERMÉS</div>
+    <div class="section-count">${state.closedTrades.length} trade${state.closedTrades.length > 1 ? 's' : ''}</div>
+  </div>
+  <div class="hist-list">
+    ${state.closedTrades.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">📁</div>Aucun trade fermé</div>`
+      : [...state.closedTrades].reverse().map(t => `
+        <div class="hist-item">
+          <div class="hist-left">
+            <span class="hist-coin">${t.coin}</span>
+            <span class="emotion-tag" style="${emotionStyle(t.emotion)}">${t.emotion}</span>
+            <span class="hist-date">${t.date}</span>
+          </div>
+          <div style="text-align:right">
+            <div class="hist-amount ${t.pnl >= 0 ? 'green' : 'red'}">${t.pnl >= 0 ? '+' : ''}${fmt(t.pnl)}</div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--mono)">${t.mult.toFixed(2)}x</div>
+          </div>
+        </div>`).join('')}
+  </div>`;
+}
+
+// ─── STATS ────────────────────────────────────────────────────
+function renderStats(){
+  const closed = state.closedTrades;
+  const wins = closed.filter(t => t.pnl > 0);
+  const losses = closed.filter(t => t.pnl <= 0);
+  const winrate = closed.length > 0 ? (wins.length / closed.length * 100) : 0;
+  const avgWin = wins.length > 0 ? wins.reduce((a, t) => a + t.pnl, 0) / wins.length : 0;
+  const avgLoss = losses.length > 0 ? losses.reduce((a, t) => a + t.pnl, 0) / losses.length : 0;
+  const best = closed.length > 0 ? closed.reduce((a, b) => b.pnl > a.pnl ? b : a, closed[0]) : null;
+  const worst = closed.length > 0 ? closed.reduce((a, b) => b.pnl < a.pnl ? b : a, closed[0]) : null;
+  const pv = portfolioValue();
+  const totalReturn = pct(pv, state.initial);
+  const wr = winrate.toFixed(0);
+
+  return `
+  <div class="section-bar">
+    <div class="section-title">STATISTIQUES GLOBALES</div>
+    <div class="section-count">${closed.length} trades fermés</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:${winrate >= 50 ? 'var(--green)' : 'var(--red)'}"></div>
+      <div class="stat-card-label">WINRATE</div>
+      <div class="stat-card-val ${winrate >= 50 ? 'green' : 'red'}">${wr}%</div>
+      <div class="stat-card-sub">${wins.length}W · ${losses.length}L</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--green)"></div>
+      <div class="stat-card-label">GAIN MOYEN</div>
+      <div class="stat-card-val green">${avgWin > 0 ? '+' : ''}${fmt(avgWin)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--red)"></div>
+      <div class="stat-card-label">PERTE MOYENNE</div>
+      <div class="stat-card-val red">${fmt(avgLoss)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--accent)"></div>
+      <div class="stat-card-label">RENDEMENT TOTAL</div>
+      <div class="stat-card-val ${totalReturn >= 0 ? 'green' : 'red'}">${fmtPct(totalReturn)}</div>
+      <div class="stat-card-sub">${totalReturn >= 0 ? '+' : ''}${fmt(pv - state.initial)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--green)"></div>
+      <div class="stat-card-label">MEILLEUR TRADE</div>
+      <div class="stat-card-val green" style="font-size:14px">${best ? best.coin : '—'}</div>
+      <div class="stat-card-sub">${best ? '+' + fmt(best.pnl) + ' · ' + best.mult.toFixed(2) + 'x' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--red)"></div>
+      <div class="stat-card-label">PIRE TRADE</div>
+      <div class="stat-card-val red" style="font-size:14px">${worst ? worst.coin : '—'}</div>
+      <div class="stat-card-sub">${worst ? fmt(worst.pnl) + ' · ' + worst.mult.toFixed(2) + 'x' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--blue)"></div>
+      <div class="stat-card-label">CAPITAL SÉCURISÉ</div>
+      <div class="stat-card-val blue">${fmt(state.secured)}</div>
+      <div class="stat-card-sub">${state.history.length} prise${state.history.length > 1 ? 's' : ''} de profit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:var(--purple)"></div>
+      <div class="stat-card-label">TRADES TOTAUX</div>
+      <div class="stat-card-val">${closed.length + state.trades.length}</div>
+      <div class="stat-card-sub">${state.trades.length} ouverts</div>
+    </div>
+  </div>
+
+  <div class="discipline-bar" style="margin-top:12px">
+    <div class="disc-title">SCORE DE DISCIPLINE</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);color:${state.history.length > 0 ? 'var(--green)' : 'var(--text3)'}">
+        ${state.history.length}
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600">profits pris correctement</div>
+        <div style="font-size:10px;color:var(--text3)">${fmt(state.secured)} sécurisés hors marché</div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:16px"><span class="reset-link" onclick="resetAll()">Réinitialiser toutes les données</span></div>`;
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────────
+function toggleForm(){
+  const f = document.getElementById('trade-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function addTrade(){
+  const coin = (document.getElementById('f-coin').value || '').trim().toUpperCase();
+  const amt = parseFloat(document.getElementById('f-amt').value);
+  const entry = parseFloat(document.getElementById('f-entry').value);
+  const cur = parseFloat(document.getElementById('f-cur').value) || entry;
+  const mcap = (document.getElementById('f-mcap').value || '').trim();
+  const risk = document.getElementById('f-risk').value;
+  const emotion = document.getElementById('f-emotion').value;
+  const note = (document.getElementById('f-note').value || '').trim();
+
+  if(!coin){ alert('Entrez le nom du coin'); return; }
+  if(!amt || amt <= 0){ alert('Entrez un montant valide'); return; }
+  if(!entry || entry <= 0){ alert('Entrez un prix d\'entrée valide'); return; }
+
+  const available = state.secured + totalCurVal() - totalInvested();
+  if(amt > available * 0.5){
+    if(!confirm(`⚠ Ce montant représente plus de 50% du capital disponible (${fmt(available)}). Cela va contre la règle "Ne jamais all-in". Continuer quand même?`)) return;
+  }
+
+  state.trades.push({
+    coin, invested: amt, entryPrice: entry, currentPrice: cur,
+    mcap, risk, emotion, note,
+    takenProfits: [], maxMultiplier: cur / entry,
+    date: new Date().toLocaleDateString('fr-FR')
+  });
+  save(); render();
+}
+
+function updatePrice(i, val){
+  const p = parseFloat(val);
+  if(isNaN(p) || p <= 0) return;
+  state.trades[i].currentPrice = p;
+  const m = p / state.trades[i].entryPrice;
+  if(m > (state.trades[i].maxMultiplier || 0)) state.trades[i].maxMultiplier = m;
+  save(); render();
+}
+
+function takeProfit(i, level){
+  const t = state.trades[i];
+  if(t.takenProfits && t.takenProfits.includes(level)){ return; }
+  const m = t.currentPrice / t.entryPrice;
+  const levelMults = {x2: 2, x3: 3, x5: 5, x10: 10};
+  const target = levelMults[level];
+  if(m < target * 0.85){
+    if(!confirm(`Le coin est à ${m.toFixed(2)}x mais vous prenez profit au niveau ${level}. Le multiplicateur cible n'est pas encore atteint. Confirmer quand même?`)) return;
+  }
+  const pcts = {x2: 0.5, x3: 0.25, x5: 0.15, x10: 0.1};
+  const pctOut = pcts[level];
+  const curVal = t.invested * (t.currentPrice / t.entryPrice);
+  const amtOut = curVal * pctOut;
+  state.secured += amtOut;
+  state.trades[i].invested -= t.invested * pctOut;
+  if(!state.trades[i].takenProfits) state.trades[i].takenProfits = [];
+  state.trades[i].takenProfits.push(level);
+  state.history.push({
+    coin: t.coin, level, amount: amtOut,
+    date: new Date().toLocaleDateString('fr-FR')
+  });
+  save(); render();
+}
+
+function closeTrade(i){
+  const t = state.trades[i];
+  const m = t.entryPrice > 0 && t.currentPrice > 0 ? t.currentPrice / t.entryPrice : 1;
+  const curVal = t.invested * m;
+  const pnlT = curVal - t.invested;
+  state.secured += curVal;
+  state.closedTrades.push({
+    coin: t.coin, pnl: pnlT, mult: m,
+    emotion: t.emotion, note: t.note,
+    date: new Date().toLocaleDateString('fr-FR')
+  });
+  state.trades.splice(i, 1);
+  save(); render();
+}
+</script>
+</body>
+</html>
